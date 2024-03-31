@@ -24,29 +24,31 @@ const io = new SocketIOServer(server, {
 app.use(cors());
 app.use(express.json());
 
-let screenSharingUser = null;
+
+let screenShareState = { isActive: false, sharerId: null, offer: null };
 
 io.on('connection', (socket) => {
-  console.log('A user connected: ' + socket.id);
+    console.log('A user connected: ' + socket.id);
 
-  if (screenSharingUser) {
-    socket.emit('screenShareStatus', { isActive: true, userId: screenSharingUser });
-  }
+    if (screenShareState.isActive) {
+        socket.emit('screenShareActive', screenShareState);
+    }
 
-  socket.on('startScreenShare', () => {
-    screenSharingUser = socket.id;
-    io.emit('screenShareStatus', { isActive: true, userId: screenSharingUser });
-  });
+    socket.on('startScreenShare', (data) => {
+        screenShareState = { isActive: true, sharerId: socket.id, offer: data.offer };
+        socket.broadcast.emit('screenShareActive', screenShareState);
+    });
 
-  socket.on('stopScreenShare', () => {
-    screenSharingUser = null;
-    io.emit('screenShareStatus', { isActive: false, userId: null });
-  });
+    socket.on('stopScreenShare', () => {
+        screenShareState = { isActive: false, sharerId: null, offer: null };
+        socket.broadcast.emit('screenShareStopped');
+    });
 
-  socket.on('chatMessage', (msg) => {
-    io.emit('chatMessage', msg);
-  });
+    socket.on('chatMessage', (msg) => {
+        io.emit('chatMessage', msg);
+    });
 });
+
 
 mongoose.connect(process.env.MONGO_URI)
     .then(() => {
