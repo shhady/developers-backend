@@ -25,14 +25,19 @@ app.use(cors());
 app.use(express.json());
 
 io.on('connection', (socket) => {
-    console.log('A user connected');
-    roomHandler(socket)
-    // Example of handling an event
-    socket.on('disconnect', () => {
-        console.log('User disconnected');
+    console.log('A user connected: ' + socket.id);
+  
+    // Handle signaling data
+    socket.on('signal', (data) => {
+      // send signal to everyone except the sender
+      socket.broadcast.emit('signal', data);
     });
-});
-
+    socket.on('chatMessage', (msg) => {
+        // Broadcast the received message object to all clients
+        io.emit('chatMessage', msg);
+      });
+  });
+  
 mongoose.connect(process.env.MONGO_URI)
     .then(() => {
         // Use server.listen here, not app.listen
