@@ -24,20 +24,30 @@ const io = new SocketIOServer(server, {
 app.use(cors());
 app.use(express.json());
 
+let screenSharingUser = null;
+
 io.on('connection', (socket) => {
-    console.log('A user connected: ' + socket.id);
-  
-    // Handle signaling data
-    socket.on('signal', (data) => {
-      // send signal to everyone except the sender
-      socket.broadcast.emit('signal', data);
-    });
-    socket.on('chatMessage', (msg) => {
-        // Broadcast the received message object to all clients
-        io.emit('chatMessage', msg);
-      });
+  console.log('A user connected: ' + socket.id);
+
+  if (screenSharingUser) {
+    socket.emit('screenShareStatus', { isActive: true, userId: screenSharingUser });
+  }
+
+  socket.on('startScreenShare', () => {
+    screenSharingUser = socket.id;
+    io.emit('screenShareStatus', { isActive: true, userId: screenSharingUser });
   });
-  
+
+  socket.on('stopScreenShare', () => {
+    screenSharingUser = null;
+    io.emit('screenShareStatus', { isActive: false, userId: null });
+  });
+
+  socket.on('chatMessage', (msg) => {
+    io.emit('chatMessage', msg);
+  });
+});
+
 mongoose.connect(process.env.MONGO_URI)
     .then(() => {
         // Use server.listen here, not app.listen
