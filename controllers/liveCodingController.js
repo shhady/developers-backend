@@ -1,5 +1,6 @@
 import LiveCoding from "../models/liveCoding.js"
 import User from "../models/user.js";
+import {StreamChat} from 'stream-chat'
 export const createLiveCodingEvent = async (req, res) => {
     const {date,time,projectName, description, language} = req.body;
     console.log(req.body)
@@ -50,6 +51,30 @@ export const getLiveCodingEvent = async (req, res) => {
 }
 
 
+export const generateStreamToken = (req, res) => {
+    const id = req.params.id;
+
+    // Access API key and secret from environment variables for better security
+    const api_key = process.env.STREAM_API_KEY;
+    const api_secret = process.env.STREAM_API_SECRET;
+
+    if (!api_key || !api_secret) {
+        return res.status(500).json({ error: "Server configuration error" });
+    }
+
+    if (!id) {
+        return res.status(400).json({ error: "Missing or invalid user ID" });
+    }
+
+    // Initialize a Server Client
+    const serverClient = StreamChat.getInstance(api_key, api_secret);
+
+    // Create User Token
+    const token = serverClient.createToken(id);
+    
+
+    res.status(200).send({ token }); // Consider sending JSON for consistency
+};
 
 export const getLiveCodingEventsByOwner = async (req, res) => {
     const {id} = req.params

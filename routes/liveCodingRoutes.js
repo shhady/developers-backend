@@ -1,10 +1,11 @@
 import express from 'express';
 const router = express.Router();
-import {createLiveCodingEvent, getLiveCodingEvents,getLiveCodingEvent,getLiveCodingEventsByOwner, updateLiveCodingEvent,deleteLiveCodingEvent} from "../controllers/liveCodingController.js"
+import {createLiveCodingEvent, getLiveCodingEvents,generateStreamToken,getLiveCodingEvent,getLiveCodingEventsByOwner, updateLiveCodingEvent,deleteLiveCodingEvent} from "../controllers/liveCodingController.js"
 
 import protect from '../middleware/authMiddleware.js';
 
 router.post('/create-live-coding-event',protect, createLiveCodingEvent);
+router.post('/generate-live-coding-token/:id',protect, generateStreamToken);
 router.get('/live-coding-events', getLiveCodingEvents);
 router.get('/live-coding-event/:id', getLiveCodingEvent);
 router.get('/live-coding-events-by-owner/:id', getLiveCodingEventsByOwner); 
