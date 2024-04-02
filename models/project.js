@@ -39,6 +39,9 @@ const projectSchema = new mongoose.Schema({
     },
     media:{
         type:Array
+    },
+    tags:{
+        type:Array
     }
 }, {
     timestamps: true

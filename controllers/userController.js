@@ -1,7 +1,7 @@
 import User from '../models/user.js';
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs" 
-
+import { emitTokenUpdateToUserSockets } from './socketHandlers.js';
 
 export const createUser = async (req, res) => {
     const {userName, email, address, password, confirmPassword, avatar, education} = req.body;
@@ -57,31 +57,36 @@ export const createUser = async (req, res) => {
 
 export const loginUser = async (req, res) => {
     const {email, password} = req.body;
-    try{
-        if(!email || !password) {
-            res.status(401)
-            throw new Error ('all fields are required')
+    try {
+        if (!email || !password) {
+            res.status(400).send('All fields are required');
+            return;
         }
-        const user  = await User.findOne({email})
+        const user = await User.findOne({ email });
 
-        if(user && (await bcrypt.compare(password, user.password))){
+        if (user && (await bcrypt.compare(password, user.password))) {
+            const token = generateToken(user._id); // Assume this function generates your token
+
+            // After generating new token in loginUser function
+            emitTokenUpdateToUserSockets(user._id.toString(), token); // Make sure user._id is a string
+
             res.json({
                 _id: user.id,
                 userName: user.userName,
                 email: user.email,
-                address:user.address,
+                address: user.address,
                 avatar: user.avatar,
                 education: user.education,
-                token:generateToken(user._id)
-            })
+                token: token // Send the new token to the client
+            });
         } else {
-            res.status(400)
-            throw new Error ("invalid credentials")
+            res.status(400).send("Invalid credentials");
         }
-    } catch(err){
-        res.send(err.message)
+    } catch (err) {
+        console.error(err);
+        res.status(500).send(err.message);
     }
-}
+};
 
 
 export const getMe = async (req, res) => {

@@ -26,10 +26,24 @@ app.use(express.json());
 
 
 let screenShareState = { isActive: false, sharerId: null, offer: null };
-
+let userSocketMap = {}; 
 io.on('connection', (socket) => {
     console.log('A user connected: ' + socket.id);
+    socket.on('registerUserSocket', (userId) => {
+        if (userSocketMap[userId]) {
+            userSocketMap[userId].push(socket.id);
+        } else {
+            userSocketMap[userId] = [socket.id];
+        }
 
+        // Clean up on disconnect
+        socket.on('disconnect', () => {
+            userSocketMap[userId] = userSocketMap[userId].filter(id => id !== socket.id);
+            if (userSocketMap[userId].length === 0) {
+                delete userSocketMap[userId];
+            }
+        });
+    });
     if (screenShareState.isActive) {
         socket.emit('screenShareActive', screenShareState);
     }

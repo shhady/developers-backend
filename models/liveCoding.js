@@ -32,7 +32,7 @@ const LiveCodingSchema = new mongoose.Schema({
         required:true,
     },
     roomId:{
-        type: String,
+         type: String,
     }
 }, {
     timestamps: true
