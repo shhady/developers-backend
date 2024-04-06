@@ -8,7 +8,7 @@ const LiveCodingSchema = new mongoose.Schema({
         required:true,
     },
     date:{
-        type: String,
+        type: Date,
         required:true,
     },
     time:{
@@ -23,7 +23,7 @@ const LiveCodingSchema = new mongoose.Schema({
         type: String,
         required:true,
     },
-    language:{
+    tags:{
         type: String,
         required:true,
     },
@@ -33,6 +33,9 @@ const LiveCodingSchema = new mongoose.Schema({
     },
     roomId:{
          type: String,
+    },
+    github:{
+        type: String,
     }
 }, {
     timestamps: true

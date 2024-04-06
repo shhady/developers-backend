@@ -2,10 +2,10 @@ import LiveCoding from "../models/liveCoding.js"
 import User from "../models/user.js";
 import {StreamChat} from 'stream-chat'
 export const createLiveCodingEvent = async (req, res) => {
-    const {date,time,projectName, description, language} = req.body;
+    const {date,time,projectName, description, tags, github} = req.body;
     console.log(req.body)
     try {
-        if(!date || !projectName || !time || !description || !language){
+        if(!date || !projectName || !time || !description || !tags || !github){
             res.status(404).send({message: 'all fields are required'})
         }
        const LiveCodingEvent = await LiveCoding.create({
@@ -13,7 +13,8 @@ export const createLiveCodingEvent = async (req, res) => {
         time,
         projectName,
         description,
-        language,
+        tags,
+        github,
         active: false,
         user:req.user.id
        })
